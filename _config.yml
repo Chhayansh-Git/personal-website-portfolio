@@ -15,7 +15,7 @@ name                     : &name "Chhayansh Porwal"
 description              : &description "Portfolio and research hub of a software engineer specializing in native Android architecture, computer vision pipelines, and full-stack development."
 url                      : "https://chhayanshporwal.github.io" # Update with your actual domain if you buy one
 baseurl                  : ""
-repository               : "Chhayansh-Git/personal-website-portfolio"
+repository               : "chhayanshporwal/chhayanshporwal.github.io"
 
 # Google AdSense (Add your Publisher ID here once approved)
 google_adsense           : "pub-XXXXXXXXXXXXXXXX"
@@ -292,14 +292,6 @@ permalink: /:categories/:title/
 timezone: Etc/UTC # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 
-# Plugins
-plugins:
-  - jekyll-feed
-  - jekyll-gist
-  - jekyll-paginate
-  - jekyll-sitemap
-  - jekyll-redirect-from
-  - jemoji
 
 # Plugins
 plugins:
