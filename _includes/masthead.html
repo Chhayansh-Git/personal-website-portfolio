@@ -20,6 +20,16 @@
           <li id="theme-toggle" class="masthead__menu-item persist tail">
             <a role="button" aria-labelledby="theme-icon"><i id="theme-icon" class="fa-solid fa-sun" aria-hidden="true" title="toggle theme"></i></a>
           </li>
+          {% assign author = site.author %}
+          <li class="masthead__menu-item mobile-only-links">
+            <div class="nav-social-links">
+              {% if author.email %}<a href="mailto:{{ author.email }}"><i class="fas fa-fw fa-envelope"></i> Email</a>{% endif %}
+              {% if author.github %}<a href="https://github.com/{{ author.github }}"><i class="fab fa-fw fa-github"></i> GitHub</a>{% endif %}
+              {% if author.kaggle %}<a href="https://kaggle.com/{{ author.kaggle }}"><i class="fab fa-fw fa-kaggle"></i> Kaggle</a>{% endif %}
+              {% if author.linkedin %}<a href="https://www.linkedin.com/in/{{ author.linkedin }}"><i class="fab fa-fw fa-linkedin"></i> LinkedIn</a>{% endif %}
+              {% if author.twitter %}<a href="https://twitter.com/{{ author.twitter }}"><i class="fab fa-fw fa-x-twitter"></i> X</a>{% endif %}
+            </div>
+          </li>
         </ul>
         <ul class="hidden-links hidden"></ul>
       </nav>

@@ -347,7 +347,43 @@
         width: auto;
         justify-content: flex-start;
       }
+
+      .mobile-only-links {
+        border-bottom: none !important;
+        padding: 8px 20px;
+
+        .nav-social-links {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+
+          a {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px !important;
+            margin: 0 !important;
+            font-size: 0.85em;
+            border-radius: 4px;
+            background: var(--global-border-color);
+            color: var(--global-text-color);
+
+            &:before {
+              display: none;
+            }
+
+            &:hover {
+              background: var(--global-base-color);
+              color: #fff;
+            }
+          }
+        }
+      }
     }
+  }
+
+  .mobile-only-links {
+    display: none;
   }
 }
 
