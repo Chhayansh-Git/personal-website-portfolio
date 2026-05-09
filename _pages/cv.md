@@ -9,56 +9,46 @@ redirect_from:
 
 {% include base_path %}
 
+You can also [download my full CV as a PDF](/Chhayansh%20Porwal-CV.pdf).
+
 Education
 ======
-* Ph.D in Version Control Theory, GitHub University, 2018 (expected)
-* M.S. in Jekyll, GitHub University, 2014
-* B.S. in GitHub, GitHub University, 2012
+* **B.Tech in Computer Science Engineering**, Rajasthan Technical University (RTU), Kota — 2023–2027
+  * CGPA: 8.81
 
-Work experience
+Work Experience
 ======
-* Spring 2024: Academic Pages Collaborator
-  * GitHub University
-  * Duties includes: Updates and improvements to template
-  * Supervisor: The Users
+* **Software Engineering Intern — Syon Technologies**
+  * Developed the core ML matching engine for the Teacher Recruitment System using SentenceTransformers and FastAPI.
+  * Engineered a semantic embedding microservice for automated resume screening and profile coaching.
+  * Integrated the ML service with a Next.js and Node.js/Prisma backend via REST APIs and Redis.
 
-* Fall 2015: Research Assistant
-  * GitHub University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
+* **Computer Vision Developer Intern — Fotographiya (iStart-incubated)**
+  * Built an AI-powered image culling backend using Python/FastAPI for a premium wedding photography startup.
+  * Developed a rapid evaluation pipeline using YOLOv8n, MediaPipe FaceMesh, and CLIP ViT-L/14.
+  * Clustered near-duplicate burst shots via L2 distance on CLIP embeddings and integrated FaceNet/MTCNN for VIP recognition.
 
-* Summer 2015: Research Assistant
-  * GitHub University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
-  
-Skills
+Technical Skills
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
-* Skill 3
+* **Programming:** Python, Kotlin, JavaScript/TypeScript, C++
+* **Web & APIs:** Node.js, FastAPI, Next.js, Prisma, HTML, CSS
+* **AI & ML:** YOLOv8, PyTorch, CLIP, MediaPipe, SentenceTransformers, 3D Noise2Void
+* **Tools & Infra:** Git, Docker, MongoDB, Redis, PostgreSQL, Firebase
+
+Achievements
+======
+* 🏆 **Global Rank 2** — AI4Life International Grand Challenge
+* 🎯 **Top 8% Nationwide** — AlgoUniversity Tech Fellowship (ATF 2025)
+* 📊 **CGPA: 8.81** — RTU, Kota
 
 Publications
 ======
   <ul>{% for post in site.publications reversed %}
     {% include archive-single-cv.html %}
   {% endfor %}</ul>
-  
-Talks
+
+Portfolio
 ======
-  <ul>{% for post in site.talks reversed %}
-    {% include archive-single-talk-cv.html  %}
-  {% endfor %}</ul>
-  
-Teaching
-======
-  <ul>{% for post in site.teaching reversed %}
+  <ul>{% for post in site.portfolio reversed %}
     {% include archive-single-cv.html %}
   {% endfor %}</ul>
-  
-Service and leadership
-======
-* Currently signed in to 43 different slack teams
