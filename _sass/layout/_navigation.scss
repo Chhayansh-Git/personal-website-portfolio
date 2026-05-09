@@ -309,6 +309,13 @@
       display: block;
       margin-left: auto;
       padding: 18px 20px;
+
+      &:hover,
+      &:focus {
+        background-color: var(--global-bg-color);
+        outline: none;
+        box-shadow: none;
+      }
     }
 
     .visible-links {
