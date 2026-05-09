@@ -351,37 +351,57 @@
       .mobile-only-links {
         border-bottom: none !important;
         padding: 10px 20px;
+        position: relative;
+
+        &:hover .follow-links,
+        &:focus-within .follow-links {
+          display: flex !important;
+        }
 
         .follow-toggle {
-          font-size: 0.85em;
-          padding: 6px 18px;
+          font-size: $type-size-5;
+          padding: 0;
+          margin: 0;
+          background: none;
+          border: none;
+          color: var(--global-masthead-link-color);
+          font-family: $sans-serif-narrow;
+          font-weight: normal;
           cursor: pointer;
+          text-align: left;
+
+          &:hover {
+            color: var(--global-masthead-link-color-hover);
+          }
         }
 
         .follow-links {
-          display: flex;
+          display: none;
           flex-wrap: wrap;
-          gap: 10px;
+          gap: 8px;
           margin-top: 10px;
+          padding-top: 8px;
 
           a {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 6px 10px !important;
+            gap: 5px;
+            padding: 5px 12px !important;
             margin: 0 !important;
             font-size: 0.85em;
-            border-radius: 4px;
-            background: var(--global-border-color);
-            color: var(--global-text-color);
+            border-radius: 20px;
+            background: var(--global-base-color);
+            color: #fff;
+            font-weight: 500;
+            text-decoration: none;
 
             &:before {
               display: none;
             }
 
             &:hover {
-              background: var(--global-base-color);
-              color: #fff;
+              opacity: 0.85;
+              transform: translateY(-1px);
             }
           }
         }
