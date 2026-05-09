@@ -410,8 +410,10 @@
     }
   }
 
-  .visible-links .mobile-only-links {
-    display: none !important;
+  @media (min-width: 925px) {
+    .visible-links .mobile-only-links {
+      display: none !important;
+    }
   }
 }
 
