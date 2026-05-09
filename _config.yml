@@ -13,8 +13,8 @@ title                    : "Chhayansh Porwal | Software Engineer & Researcher"
 title_separator          : "-"
 name                     : &name "Chhayansh Porwal"
 description              : &description "Portfolio and research hub of a software engineer specializing in native Android architecture, computer vision pipelines, and full-stack development."
-url                      : https://chhayanshporwal.github.io # Update with your actual GitHub Pages URL
-baseurl                  : "" # the subpath of your site, e.g. "/blog"
+url                      : "https://Chhayansh-Git.github.io" # Update with your actual domain if you buy one
+baseurl                  : "/personal-website-portfolio" # the subpath of your site
 repository               : "Chhayansh-Git/personal-website-portfolio"
 
 # Google AdSense (Add your Publisher ID here once approved)
