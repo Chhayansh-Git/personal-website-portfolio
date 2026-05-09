@@ -56,10 +56,10 @@ author:
   bitbucket        : # Username - Update with your username on the site
   codepen          : # Username
   dribbble         : # Username
-  github           : "Chhayansh-Git" # https://github.com/Chhayansh-Git/
+  github           : "chhayanshporwal" # https://github.com/Chhayansh-Git/
   kaggle           : "chhayanshporwal"
   stackoverflow    : # User number or user number and name (i.e., use "1" or "1/jeff-atwood")
-  leetcode         : "chhayansh-git" # http://leetcode.com/u/chhayansh-git/
+  leetcode         : "chhayanshporwal" # http://leetcode.com/u/chhayansh-git/
 
   # Social media
   artstation       : # Username
@@ -157,7 +157,7 @@ social:
   type                   : "Person"
   name                   : "Chhayansh Porwal"
   links:
-    - "https://github.com/Chhayansh-Git"
+    - "https://github.com/chhayanshporwal"
     - "https://www.linkedin.com/in/chhayansh-porwal/"
     - "https://x.com/ChhayanshPorwal"
     - "https://www.kaggle.com/chhayanshporwal"
