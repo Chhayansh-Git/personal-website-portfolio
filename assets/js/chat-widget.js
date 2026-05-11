@@ -53,6 +53,7 @@
   let vrmModel = null;
   let vrmClock = null;
   let vrmAnimId = null;
+  let isVrmHovered = false;
 
   // ─── DOM References ──────────────────────────────────────────
   const $ = (sel) => document.querySelector(sel);
@@ -116,6 +117,8 @@
 
     // Click handler (always wired regardless of 3D success)
     container.addEventListener('click', toggleChat);
+    container.addEventListener('mouseenter', () => { isVrmHovered = true; });
+    container.addEventListener('mouseleave', () => { isVrmHovered = false; });
 
     // Three.js is loaded via <script type="module"> which runs async.
     // Poll until window.THREE is available (max 5 seconds).
@@ -150,10 +153,10 @@
     // Scene
     vrmScene = new THREE.Scene();
 
-    // Camera — positioned to frame a VRM head/upper body
-    vrmCamera = new THREE.PerspectiveCamera(25, width / height, 0.1, 20);
-    vrmCamera.position.set(0, 1.35, 2.5);
-    vrmCamera.lookAt(0, 1.2, 0);
+    // Camera — positioned to frame a standing VRM avatar
+    vrmCamera = new THREE.PerspectiveCamera(35, width / height, 0.1, 20);
+    vrmCamera.position.set(0, 0.9, 2.6);
+    vrmCamera.lookAt(0, 0.9, 0);
 
     // Renderer
     vrmRenderer = new THREE.WebGLRenderer({
@@ -221,7 +224,8 @@
         const vrm = gltf.userData.vrm;
         if (vrm) {
           vrmModel = vrm;
-          vrm.scene.rotation.y = Math.PI; // Face camera
+          // Most VRM models face +Z, camera looks down -Z. Rotation 0 should face camera.
+          vrm.scene.rotation.y = 0; 
           vrmScene.add(vrm.scene);
 
           // Apply initial look-at if supported
@@ -264,10 +268,44 @@
     const delta = vrmClock ? vrmClock.getDelta() : 0.016;
     const elapsed = vrmClock ? vrmClock.getElapsedTime() : 0;
 
-    // Idle breathing / bobbing animation
+    // Idle breathing & interactive waving animation
     if (vrmModel && vrmModel.scene) {
-      vrmModel.scene.position.y = Math.sin(elapsed * 1.2) * 0.015;
-      vrmModel.scene.rotation.y = Math.PI + Math.sin(elapsed * 0.5) * 0.05;
+      // Gentle breathing (vertical bounce)
+      vrmModel.scene.position.y = Math.sin(elapsed * 2) * 0.015;
+
+      // Arm waving logic
+      if (vrmModel.humanoid) {
+        const rightArm = vrmModel.humanoid.getNormalizedBoneNode('rightUpperArm');
+        const rightLowerArm = vrmModel.humanoid.getNormalizedBoneNode('rightLowerArm');
+        const head = vrmModel.humanoid.getNormalizedBoneNode('head');
+
+        if (rightArm && rightLowerArm) {
+          if (isVrmHovered && !isChatOpen) {
+            // Waving state
+            const wave = Math.sin(elapsed * 12) * 0.4;
+            
+            // Lerp arm up
+            rightArm.rotation.z = THREE.MathUtils.lerp(rightArm.rotation.z, -1.3, 0.1);
+            rightArm.rotation.x = THREE.MathUtils.lerp(rightArm.rotation.x, 0.2, 0.1);
+            
+            // Oscillate lower arm
+            rightLowerArm.rotation.z = THREE.MathUtils.lerp(rightLowerArm.rotation.z, wave - 0.2, 0.2);
+            
+            // Look slightly towards the user
+            if (head) head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, 0.2, 0.1);
+            if (head) head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, 0.1, 0.1);
+          } else {
+            // Idle state
+            rightArm.rotation.z = THREE.MathUtils.lerp(rightArm.rotation.z, -0.1, 0.05);
+            rightArm.rotation.x = THREE.MathUtils.lerp(rightArm.rotation.x, 0, 0.05);
+            rightLowerArm.rotation.z = THREE.MathUtils.lerp(rightLowerArm.rotation.z, 0, 0.05);
+            
+            // Head idle movement
+            if (head) head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, Math.sin(elapsed * 0.5) * 0.05, 0.05);
+            if (head) head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, 0, 0.05);
+          }
+        }
+      }
 
       // Update VRM (spring bones, etc.)
       if (typeof vrmModel.update === 'function') {
