@@ -117,20 +117,30 @@
     // Click handler (always wired regardless of 3D success)
     container.addEventListener('click', toggleChat);
 
-    // Check if Three.js globals are available (loaded via CDN importmap)
-    if (typeof THREE === 'undefined') {
-      console.warn('Annai: THREE.js not loaded, using fallback avatar.');
-      renderFallbackAvatar(container);
-      return;
+    // Three.js is loaded via <script type="module"> which runs async.
+    // Poll until window.THREE is available (max 5 seconds).
+    let attempts = 0;
+    const maxAttempts = 50; // 50 × 100ms = 5 seconds
+
+    function tryInit3D() {
+      if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined') {
+        try {
+          initThreeScene(container);
+          loadVRMModel();
+        } catch (err) {
+          console.warn('Annai: 3D init failed, using fallback.', err);
+          renderFallbackAvatar(container);
+        }
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        setTimeout(tryInit3D, 100);
+      } else {
+        console.warn('Annai: THREE.js not loaded after 5s, using fallback avatar.');
+        renderFallbackAvatar(container);
+      }
     }
 
-    try {
-      initThreeScene(container);
-      loadVRMModel();
-    } catch (err) {
-      console.warn('Annai: 3D init failed, using fallback.', err);
-      renderFallbackAvatar(container);
-    }
+    tryInit3D();
   }
 
   function initThreeScene(container) {
