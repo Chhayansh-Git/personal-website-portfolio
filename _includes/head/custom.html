@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 
-<!-- Annai Chat Widget: Three.js + VRM (loaded as ES module, exposed to window) -->
+<!-- Annai Chat Widget: Three.js + VRM -->
 <script type="importmap">
 {
   "imports": {
@@ -31,16 +31,16 @@
 </script>
 <script type="module">
   try {
-    const THREE = await import('three');
-    const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
-    const { VRMLoaderPlugin } = await import('@pixiv/three-vrm');
-    // Expose to global scope for chat-widget.js
-    window.THREE = THREE;
-    window.THREE.GLTFLoader = GLTFLoader;
-    window.THREE.VRMLoaderPlugin = VRMLoaderPlugin;
-    console.log('Annai: Three.js + VRM loaded successfully.');
+    var threeModule = await import('three');
+    var gltfModule = await import('three/addons/loaders/GLTFLoader.js');
+    var vrmModule = await import('@pixiv/three-vrm');
+    // Module namespace objects are frozen — spread into a mutable plain object
+    window.THREE = Object.assign({}, threeModule);
+    window.THREE.GLTFLoader = gltfModule.GLTFLoader;
+    window.THREE.VRMLoaderPlugin = vrmModule.VRMLoaderPlugin;
+    console.log('Annai: Three.js + VRM loaded OK');
   } catch (err) {
-    console.error('Annai: Failed to load Three.js/VRM:', err);
+    console.error('Annai: Three.js load error:', err);
   }
 </script>
 

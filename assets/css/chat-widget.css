@@ -567,6 +567,32 @@
 }
 
 /* ─── Mobile Responsive ──────────────────────────────────────── */
+
+/* Tablets and small laptops */
+@media (max-width: 768px) {
+  #annai-chat-panel {
+    width: 360px;
+    height: 480px;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  #annai-avatar-container {
+    width: 90px;
+    height: 90px;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  #annai-tooltip {
+    bottom: 115px;
+    right: 16px;
+    max-width: 200px;
+    font-size: 0.78rem;
+  }
+}
+
+/* Phones */
 @media (max-width: 480px) {
   #annai-chat-panel {
     width: 100vw;
@@ -575,20 +601,89 @@
     bottom: 0;
     right: 0;
     border-radius: 0;
+    border: none;
+  }
+
+  #annai-chat-panel.annai-open {
+    transform: translateY(0) scale(1);
   }
 
   #annai-avatar-container {
-    bottom: 16px;
-    right: 16px;
-    width: 90px;
-    height: 90px;
+    bottom: 12px;
+    right: 12px;
+    width: 70px;
+    height: 70px;
   }
 
   #annai-tooltip {
-    bottom: 115px;
-    right: 16px;
-    max-width: 180px;
-    font-size: 0.75rem;
+    bottom: 90px;
+    right: 12px;
+    max-width: 170px;
+    font-size: 0.72rem;
+    padding: 8px 12px;
+  }
+
+  .annai-header {
+    padding: 12px 14px;
+  }
+
+  .annai-header-name {
+    font-size: 0.95rem;
+  }
+
+  .annai-welcome h3 {
+    font-size: 1rem;
+  }
+
+  .annai-welcome p {
+    font-size: 0.78rem;
+  }
+
+  .annai-messages {
+    padding: 12px;
+  }
+
+  .annai-message {
+    max-width: 90%;
+    font-size: 0.82rem;
+    padding: 10px 13px;
+  }
+
+  .annai-input-area {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .annai-input {
+    font-size: 0.85rem;
+    padding: 10px 14px;
+  }
+
+  .annai-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* Very small phones (iPhone SE, etc.) */
+@media (max-width: 360px) {
+  #annai-avatar-container {
+    width: 60px;
+    height: 60px;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  #annai-tooltip {
+    bottom: 78px;
+    right: 10px;
+    max-width: 150px;
+    font-size: 0.7rem;
+  }
+
+  .annai-header-name {
+    font-size: 0.88rem;
   }
 }
 
