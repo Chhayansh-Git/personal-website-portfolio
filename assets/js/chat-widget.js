@@ -57,6 +57,7 @@
   let annaiState = 'awake'; // 'awake', 'sleeping', 'chatting'
   let sleepTimer = null;
   const SLEEP_DELAY = 5000; // 5 seconds
+  let isTransitioningToSleep = false;
 
   // ─── DOM References ──────────────────────────────────────────
   const $ = (sel) => document.querySelector(sel);
@@ -285,42 +286,49 @@
     const elapsed = vrmClock ? vrmClock.getElapsedTime() : 0;
 
     // Graceful Pose State Machine
-    if (vrmModel && vrmModel.scene) {
-      const leftArm = vrmModel.humanoid?.getNormalizedBoneNode('leftUpperArm');
-      const leftLowerArm = vrmModel.humanoid?.getNormalizedBoneNode('leftLowerArm');
-      const rightArm = vrmModel.humanoid?.getNormalizedBoneNode('rightUpperArm');
-      const rightLowerArm = vrmModel.humanoid?.getNormalizedBoneNode('rightLowerArm');
-      const head = vrmModel.humanoid?.getNormalizedBoneNode('head');
-      const spine = vrmModel.humanoid?.getNormalizedBoneNode('spine');
+    if (vrmModel && vrmModel.scene && vrmModel.humanoid) {
+      const getBone = (name) => {
+        const bone = vrmModel.humanoid.getNormalizedBoneNode?.(name) || vrmModel.humanoid.getRawBoneNode?.(name);
+        return bone?.node || bone; // Extract the THREE.Object3D from the VRMBone wrapper
+      };
+      
+      const leftArm = getBone('leftUpperArm');
+      const leftLowerArm = getBone('leftLowerArm');
+      const rightArm = getBone('rightUpperArm');
+      const rightLowerArm = getBone('rightLowerArm');
+      const head = getBone('head');
+      const spine = getBone('spine');
 
-      // Default Awake/Idle Pose (Graceful standing, arms down, slight breathing)
+      // Default Awake/Idle Pose (Graceful standing, slightly leaning, arms relaxed)
       const tPose = {
         sceneRotX: 0, sceneRotZ: 0, scenePosY: Math.sin(elapsed * 2) * 0.015, scenePosX: 0,
-        rArmZ: -1.2, rArmX: 0, rArmY: 0, rLowerArmZ: 0, rLowerArmX: 0,
-        lArmZ: 1.2, lArmX: 0, lArmY: 0, lLowerArmZ: 0, lLowerArmX: 0,
+        rArmZ: -1.2, rArmX: 0.3, rArmY: 0, rLowerArmZ: 0, rLowerArmX: -0.1, // Arm slightly behind
+        lArmZ: 1.2, lArmX: -0.1, lArmY: 0, lLowerArmZ: 0, lLowerArmX: -0.1, // Arm relaxed
         headX: 0, headY: Math.sin(elapsed * 0.5) * 0.05, headZ: 0,
-        spineX: 0, spineY: 0, spineZ: 0
+        spineX: 0.05, spineY: 0, spineZ: 0
       };
 
       if (annaiState === 'sleeping') {
         // Lying down gracefully
         tPose.sceneRotX = -Math.PI / 2.2;
         tPose.scenePosY = -0.7;
-        tPose.lArmZ = 1.4; tPose.rArmZ = -1.4;
-        tPose.headX = -0.2; tPose.headZ = 0.2;
+        tPose.rArmZ = -1.2; tPose.rArmX = -0.2;
+        tPose.lArmZ = 1.2; tPose.lArmX = -0.2;
+        tPose.headX = -0.2; tPose.headZ = 0.3; // head tilted sideways
       } else if (annaiState === 'chatting') {
         // Leaning gracefully with folded arms
         tPose.sceneRotZ = -0.15;
         tPose.scenePosX = -0.1;
-        tPose.rArmZ = -1.0; tPose.rArmX = -0.5; tPose.rArmY = -0.5; tPose.rLowerArmX = -1.8;
-        tPose.lArmZ = 1.0; tPose.lArmX = -0.5; tPose.lArmY = 0.5; tPose.lLowerArmX = -1.8;
+        tPose.rArmZ = -1.0; tPose.rArmX = -0.5; tPose.rArmY = -0.5; tPose.rLowerArmX = -2.0;
+        tPose.lArmZ = 1.0; tPose.lArmX = -0.5; tPose.lArmY = 0.5; tPose.lLowerArmX = -2.0;
         tPose.headY = -0.2;
       } else if (isVrmHovered) {
-        // Energetic wave
-        tPose.rArmZ = -2.5; // High up
-        tPose.rArmX = 0.2;
-        tPose.rLowerArmZ = Math.sin(elapsed * 12) * 0.6;
-        tPose.headY = 0.2; // Look up
+        // Energetic wave (arm high up)
+        tPose.rArmZ = -2.8; 
+        tPose.rArmX = 0.3;
+        tPose.rArmY = 0.5;
+        tPose.rLowerArmZ = Math.sin(elapsed * 12) * 0.8;
+        tPose.headY = 0.2; 
       }
 
       // Smoothly interpolate all values towards target pose
@@ -486,24 +494,41 @@
   }
 
   function goToSleep() {
-    if (annaiState === 'chatting') return;
+    if (annaiState === 'chatting' || isTransitioningToSleep) return;
+    
+    // Step 1: Trigger 3D sleeping animation (lie down)
     annaiState = 'sleeping';
-    const container = avatarContainer();
-    if (container) container.classList.add('annai-sleeping');
-    if (wakeArrow()) wakeArrow().classList.add('annai-visible');
+    isTransitioningToSleep = true;
     const tip = tooltip();
     if (tip) tip.classList.remove('annai-visible');
+    
+    // Step 2: Wait for the graceful animation to finish, then disappear
+    setTimeout(() => {
+      if (annaiState !== 'sleeping') return; // Cancel if woken up
+      isTransitioningToSleep = false;
+      const container = avatarContainer();
+      if (container) container.classList.add('annai-sleeping');
+      if (wakeArrow()) wakeArrow().classList.add('annai-visible');
+    }, 1200); // Wait 1.2s for lerp to complete
   }
 
   function wakeUp() {
-    annaiState = 'awake';
+    isTransitioningToSleep = false;
+    
+    // Step 1: Reappear immediately while still in the sleeping pose on the floor
     const container = avatarContainer();
     if (container) container.classList.remove('annai-sleeping');
     if (wakeArrow()) wakeArrow().classList.remove('annai-visible');
     
-    // Wave on wake up
-    isVrmHovered = true;
-    setTimeout(() => { isVrmHovered = false; }, 3000);
+    // Step 2: Change state to awake so she smoothly stands up
+    annaiState = 'awake';
+    
+    // Step 3: Trigger wave *after* she stands up
+    setTimeout(() => { 
+      isVrmHovered = true; 
+      setTimeout(() => { isVrmHovered = false; }, 3000);
+    }, 800); // Wait 0.8s for stand up animation
+    
     resetSleepTimer();
   }
 
