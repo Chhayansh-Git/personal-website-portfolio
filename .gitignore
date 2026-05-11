@@ -21,3 +21,7 @@ package-lock.json
 
 # Ignore files created by MacOS
 .DS_Store
+
+# Annai ETL pipeline (secrets and dependencies)
+_scripts/voice-rag-etl/node_modules/
+_scripts/voice-rag-etl/.env

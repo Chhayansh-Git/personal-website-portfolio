@@ -1,0 +1,601 @@
+/* ═══════════════════════════════════════════════════════════════
+   ANNAI — Voice RAG Chat Widget
+   Premium glassmorphic floating widget with 3D avatar trigger
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Google Font Import ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ─── Design Tokens ──────────────────────────────────────────── */
+:root {
+  --annai-primary: #7c3aed;
+  --annai-primary-light: #a78bfa;
+  --annai-primary-dark: #5b21b6;
+  --annai-accent: #06b6d4;
+  --annai-accent-glow: rgba(6, 182, 212, 0.3);
+  --annai-glass-bg: rgba(15, 10, 30, 0.82);
+  --annai-glass-border: rgba(255, 255, 255, 0.08);
+  --annai-glass-surface: rgba(255, 255, 255, 0.04);
+  --annai-text: #f1f5f9;
+  --annai-text-muted: #94a3b8;
+  --annai-user-bubble: linear-gradient(135deg, #7c3aed, #6d28d9);
+  --annai-bot-bubble: rgba(255, 255, 255, 0.06);
+  --annai-danger: #ef4444;
+  --annai-success: #22c55e;
+  --annai-radius: 16px;
+  --annai-radius-sm: 10px;
+  --annai-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(124, 58, 237, 0.15);
+  --annai-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── 3D Avatar Container ────────────────────────────────────── */
+#annai-avatar-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 110px;
+  height: 110px;
+  z-index: 9998;
+  cursor: pointer;
+  transition: transform var(--annai-transition), opacity var(--annai-transition);
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.25), 0 0 0 2px rgba(124, 58, 237, 0.1);
+}
+
+#annai-avatar-container:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.35), 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+#annai-avatar-container.annai-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+}
+
+/* Three.js VRM canvas or fallback */
+#annai-avatar-container canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* Fallback avatar (used when Spline isn't available) */
+.annai-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4), 0 0 0 3px rgba(124, 58, 237, 0.15);
+  animation: annai-float 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.annai-avatar-fallback::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #7c3aed, #06b6d4, #a78bfa, #7c3aed);
+  z-index: -1;
+  animation: annai-ring-spin 4s linear infinite;
+}
+
+.annai-avatar-fallback::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a0a3e, #0f172a);
+}
+
+.annai-avatar-fallback svg {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 2px 8px rgba(167, 139, 250, 0.5));
+}
+
+/* Idle floating animation */
+@keyframes annai-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes annai-ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Tooltip ────────────────────────────────────────────────── */
+#annai-tooltip {
+  position: fixed;
+  bottom: 140px;
+  right: 20px;
+  background: var(--annai-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--annai-glass-border);
+  color: var(--annai-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: var(--annai-radius-sm);
+  z-index: 9999;
+  max-width: 220px;
+  line-height: 1.4;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(8px) scale(0.95);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+#annai-tooltip.annai-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+#annai-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  right: 40px;
+  width: 12px;
+  height: 12px;
+  background: var(--annai-glass-bg);
+  border-right: 1px solid var(--annai-glass-border);
+  border-bottom: 1px solid var(--annai-glass-border);
+  transform: rotate(45deg);
+}
+
+/* ─── Chat Panel ─────────────────────────────────────────────── */
+#annai-chat-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 400px;
+  height: 540px;
+  background: var(--annai-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--annai-glass-border);
+  border-radius: var(--annai-radius);
+  box-shadow: var(--annai-shadow);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+
+  /* Hidden by default */
+  opacity: 0;
+  transform: translateY(24px) scale(0.95);
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#annai-chat-panel.annai-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ─── Chat Header ────────────────────────────────────────────── */
+.annai-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--annai-glass-border);
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+}
+
+.annai-header-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--annai-primary), var(--annai-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.annai-header-avatar::after {
+  content: '';
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  background: var(--annai-success);
+  border-radius: 50%;
+  border: 2px solid rgba(15, 10, 30, 0.9);
+}
+
+.annai-header-avatar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.annai-header-info {
+  flex: 1;
+}
+
+.annai-header-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--annai-text);
+  letter-spacing: 0.3px;
+}
+
+.annai-header-status {
+  font-size: 0.7rem;
+  color: var(--annai-success);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+.annai-close-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--annai-glass-surface);
+  border-radius: 8px;
+  color: var(--annai-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--annai-transition);
+  flex-shrink: 0;
+}
+
+.annai-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--annai-text);
+}
+
+/* ─── Messages Area ──────────────────────────────────────────── */
+.annai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+.annai-messages::-webkit-scrollbar {
+  width: 4px;
+}
+.annai-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+.annai-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* ─── Message Bubbles ────────────────────────────────────────── */
+.annai-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  animation: annai-msg-in 0.3s ease-out;
+}
+
+@keyframes annai-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.annai-msg--user {
+  align-self: flex-end;
+}
+
+.annai-msg--bot {
+  align-self: flex-start;
+}
+
+.annai-msg__bubble {
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--annai-text);
+  word-break: break-word;
+}
+
+.annai-msg--user .annai-msg__bubble {
+  background: var(--annai-user-bubble);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.25);
+}
+
+.annai-msg--bot .annai-msg__bubble {
+  background: var(--annai-bot-bubble);
+  border: 1px solid var(--annai-glass-border);
+  border-bottom-left-radius: 4px;
+}
+
+/* ─── Source Chips ────────────────────────────────────────────── */
+.annai-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.annai-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--annai-primary-light);
+  text-decoration: none;
+  transition: all var(--annai-transition);
+}
+
+.annai-source-chip:hover {
+  background: rgba(124, 58, 237, 0.3);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.annai-source-chip svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ─── Typing Indicator ───────────────────────────────────────── */
+.annai-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 18px;
+  background: var(--annai-bot-bubble);
+  border: 1px solid var(--annai-glass-border);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+  max-width: 80px;
+}
+
+.annai-typing__dot {
+  width: 7px;
+  height: 7px;
+  background: var(--annai-text-muted);
+  border-radius: 50%;
+  animation: annai-bounce 1.4s infinite ease-in-out;
+}
+
+.annai-typing__dot:nth-child(2) { animation-delay: 0.16s; }
+.annai-typing__dot:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes annai-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ─── Input Area ─────────────────────────────────────────────── */
+.annai-input-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--annai-glass-border);
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+}
+
+.annai-input {
+  flex: 1;
+  background: var(--annai-glass-surface);
+  border: 1px solid var(--annai-glass-border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--annai-text);
+  outline: none;
+  transition: border-color var(--annai-transition);
+}
+
+.annai-input::placeholder {
+  color: var(--annai-text-muted);
+}
+
+.annai-input:focus {
+  border-color: var(--annai-primary);
+}
+
+/* Action buttons (send, mic, speaker) */
+.annai-btn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--annai-transition);
+  flex-shrink: 0;
+}
+
+.annai-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.annai-send-btn {
+  background: linear-gradient(135deg, var(--annai-primary), var(--annai-primary-dark));
+  color: white;
+}
+
+.annai-send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+}
+
+.annai-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.annai-mic-btn {
+  background: var(--annai-glass-surface);
+  border: 1px solid var(--annai-glass-border);
+  color: var(--annai-text-muted);
+}
+
+.annai-mic-btn:hover {
+  color: var(--annai-text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.annai-mic-btn.annai-recording {
+  color: var(--annai-danger);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  animation: annai-mic-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes annai-mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.annai-speaker-btn {
+  background: var(--annai-glass-surface);
+  border: 1px solid var(--annai-glass-border);
+  color: var(--annai-text-muted);
+}
+
+.annai-speaker-btn:hover {
+  color: var(--annai-text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.annai-speaker-btn.annai-speaking {
+  color: var(--annai-accent);
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+/* ─── Welcome Message ────────────────────────────────────────── */
+.annai-welcome {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--annai-text-muted);
+}
+
+.annai-welcome__icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  background: linear-gradient(135deg, var(--annai-primary), var(--annai-accent));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+}
+
+.annai-welcome__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.annai-welcome h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--annai-text);
+  margin: 0 0 6px;
+}
+
+.annai-welcome p {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ─── Error State ────────────────────────────────────────────── */
+.annai-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: #fca5a5;
+  align-self: center;
+  max-width: 90%;
+  text-align: center;
+}
+
+/* ─── Mobile Responsive ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  #annai-chat-panel {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    bottom: 0;
+    right: 0;
+    border-radius: 0;
+  }
+
+  #annai-avatar-container {
+    bottom: 16px;
+    right: 16px;
+    width: 90px;
+    height: 90px;
+  }
+
+  #annai-tooltip {
+    bottom: 115px;
+    right: 16px;
+    max-width: 180px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

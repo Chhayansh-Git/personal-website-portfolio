@@ -14,4 +14,30 @@
 <link rel="icon" href="/images/favicon.ico"/>
 <meta name="theme-color" content="#ffffff"/>
 
+<!-- Annai Chat Widget: Styles + Font -->
+<link rel="stylesheet" href="{{ base_path }}/assets/css/chat-widget.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+
+<!-- Annai Chat Widget: Three.js + VRM (deferred to avoid blocking page render) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/",
+    "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.3.4/lib/three-vrm.module.min.js"
+  }
+}
+</script>
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { VRMLoaderPlugin } from '@pixiv/three-vrm';
+  // Expose to global scope for chat-widget.js (non-module script)
+  window.THREE = THREE;
+  THREE.GLTFLoader = GLTFLoader;
+  THREE.VRMLoaderPlugin = VRMLoaderPlugin;
+</script>
+
 <!-- end custom head snippets -->
+
