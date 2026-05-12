@@ -161,8 +161,8 @@
 /* ─── Tooltip ────────────────────────────────────────────────── */
 #annai-tooltip {
   position: fixed;
-  bottom: 195px;
-  right: 90px;
+  bottom: 200px;
+  right: 100px;
   background: var(--annai-glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
