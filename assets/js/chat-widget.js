@@ -359,12 +359,12 @@
         t.sceneRotZ = Math.PI / 2;    /* Roll 90° to the right */
         t.scenePosY = -0.3;
         t.scenePosX = 0.8;
-        /* Left arm tucked under head */
-        t.lUAz = 0.5; t.lUAx = -1.0;
-        t.lLAx = -1.2;
-        /* Right arm resting on body */
-        t.rUAz = -0.3; t.rUAx = -0.5;
-        t.rLAx = -0.8;
+        /* Arms stay DOWN at sides (close to standing values) with forward curl.
+           Standing = rUAz:1.2, lUAz:-1.2. Keeping close avoids T-pose pass-through. */
+        t.rUAz = 1.0;  t.rUAx = -0.4;   /* Right arm at side, curled forward slightly */
+        t.rLAx = -0.6;                    /* Right elbow slightly bent */
+        t.lUAz = -1.0; t.lUAx = -0.6;   /* Left arm at side, curled forward (pillow) */
+        t.lLAx = -0.9;                    /* Left elbow bent more (hand near face) */
         /* Legs slightly bent */
         t.lULx = -0.4; t.rULx = -0.5;
         t.lLLx = 0.6; t.rLLx = 0.8;
