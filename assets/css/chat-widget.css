@@ -58,7 +58,7 @@
      Panel: bottom 20px, height 540px → top edge at 560px from viewport bottom.
      Place avatar so her lower body overlaps the panel top edge. */
   top: auto;
-  bottom: 450px;
+  bottom: 410px;
   right: 20px;
   transform: none;
   z-index: 10001;
