@@ -255,6 +255,10 @@
             vrm.lookAt.target = vrmCamera;
           }
           
+          /* Now that the model is loaded, show the tooltip */
+          window._annaiVRMReady = true;
+          showTooltipAfterLoad();
+          
           console.log('Annai: VRM loaded. Humanoid:', !!vrm.humanoid, 'Bones:', vrm.humanoid ? Object.keys(vrm.humanoid.humanBones) : 'N/A');
         } else {
           // Plain GLTF model fallback
@@ -291,6 +295,20 @@
 
     const delta = vrmClock ? vrmClock.getDelta() : 0.016;
     const elapsed = vrmClock ? vrmClock.getElapsedTime() : 0;
+
+    /* ── Dynamic camera per state ── */
+    /* Standing/waving: frame upper body; Chatting: zoom out for full body; Sleeping: follow her down */
+    let camTargetY = 1.15, camTargetZ = 1.9;
+    if (annaiState === 'chatting') {
+      camTargetY = 0.7;   /* Lower to show legs */
+      camTargetZ = 2.8;   /* Pull back further */
+    } else if (annaiState === 'sleeping') {
+      camTargetY = 0.35;  /* Follow her all the way down as she lies */
+      camTargetZ = 3.2;   /* Pull back wide to show full lying body */
+    }
+    vrmCamera.position.y = THREE.MathUtils.lerp(vrmCamera.position.y, camTargetY, 0.03);
+    vrmCamera.position.z = THREE.MathUtils.lerp(vrmCamera.position.z, camTargetZ, 0.03);
+    vrmCamera.lookAt(0, camTargetY, 0);
 
     /* ── Set NORMALIZED bone rotations BEFORE vrm.update() ── */
     /* VRM 1.0 architecture:
@@ -366,13 +384,13 @@
         t.spineX = 0.05;
         t.hipsPosY = -0.15;
       } else if (isVrmHovered && !hasWaved) {
-        /* Cute wave with right hand near face (ref image 3) */
+        /* Cute wave with right hand raised (ref image 3) */
         t.rUAz = -0.8; t.rUAx = 0;
         t.rUAy = -0.8;
         t.rLAx = -1.8;
         t.rLAz = Math.sin(elapsed * 8) * 0.2;
-        /* Left arm relaxed */
-        t.lUAz = -0.15;
+        /* Left arm stays at side */
+        t.lUAz = -1.2; t.lUAx = 0.05;
         /* Head tilt */
         t.headZ = 0.1; t.headY = 0;
         t.headX = Math.sin(elapsed * 0.5) * 0.03;
@@ -473,20 +491,23 @@
   }
 
   // ─── Tooltip ──────────────────────────────────────────────────
+  function showTooltipAfterLoad() {
+    /* Called when VRM model finishes loading — syncs bubble with avatar */
+    const tip = tooltip();
+    if (!tip || isOpen) return;
+    tip.classList.add('annai-visible');
+    tooltipHideTimeout = setTimeout(() => {
+      tip.classList.remove('annai-visible');
+    }, 5000);
+  }
+
   function initTooltip() {
     const container = avatarContainer();
     const tip = tooltip();
     if (!container || !tip) return;
 
-    // Show tooltip on first visit after a brief delay
-    tooltipTimeout = setTimeout(() => {
-      if (!isOpen) {
-        tip.classList.add('annai-visible');
-        tooltipHideTimeout = setTimeout(() => {
-          tip.classList.remove('annai-visible');
-        }, 5000);
-      }
-    }, 2000);
+    /* Do NOT auto-show the tooltip here — we wait for VRM to load.
+       showTooltipAfterLoad() is called from the VRM load callback. */
 
     // Show on hover
     container.addEventListener('mouseenter', () => {
@@ -582,14 +603,19 @@
     const tip = tooltip();
     if (tip) tip.classList.remove('annai-visible');
     
-    /* Step 2: Wait for the graceful lie-down animation to finish, then fade out */
+    /* Step 2: Wait for the graceful lie-down animation to complete visibly,
+       then hold her there so the user sees her lying, THEN fade out */
     setTimeout(() => {
       if (annaiState !== 'sleeping') return; /* Cancel if woken up early */
       isTransitioningToSleep = false;
-      const container = avatarContainer();
-      if (container) container.classList.add('annai-sleeping');
-      if (wakeArrow()) wakeArrow().classList.add('annai-visible');
-    }, 3000); /* 3s \u2014 enough time for the full cinematic lie-down animation */
+      /* She is now fully lying down — hold visible for 4 more seconds */
+      setTimeout(() => {
+        if (annaiState !== 'sleeping') return;
+        const container = avatarContainer();
+        if (container) container.classList.add('annai-sleeping');
+        if (wakeArrow()) wakeArrow().classList.add('annai-visible');
+      }, 4000); /* 4s visible while lying */
+    }, 4000); /* 4s for the lie-down animation itself */
   }
 
   function wakeUp() {
