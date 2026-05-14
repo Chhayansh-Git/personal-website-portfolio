@@ -1,6 +1,6 @@
 ---
 title: "AI Wedding Culling System"
-excerpt: "Production CV pipeline chaining YOLOv8 + CLIP + MTCNN to auto-cull thousands of wedding photos — blur rejection, VIP preservation, duplicate clustering.<br/>`YOLOv8` `CLIP ViT-L/14` `FastAPI` `MTCNN`"
+excerpt: "An AI-powered image processing backend to rapidly evaluate and filter raw wedding photography folders."
 collection: portfolio
 ---
 
