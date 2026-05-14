@@ -36,8 +36,8 @@ if (existsSync(envPath)) {
 
 // ─── Configuration ──────────────────────────────────────────────
 const EMBEDDING_MODEL = 'text-embedding-004'; // 768 dimensions
-const CHUNK_SIZE = 500;
-const CHUNK_OVERLAP = 50;
+const CHUNK_SIZE = 800;
+const CHUNK_OVERLAP = 100;
 const UPSERT_BATCH = 5;
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;

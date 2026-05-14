@@ -1,6 +1,6 @@
 ---
 title: "CallSentry"
-excerpt: "A native Android security application engineered for proactive privacy and emergency call breakthrough."
+excerpt: "System-level Android call interceptor with whitelist-based blocking, emergency breakthrough routing, and offline-first privacy architecture. Built in 3 days.<br/>`Kotlin` `Jetpack Compose` `MVVM` `Room DB`"
 collection: portfolio
 ---
 

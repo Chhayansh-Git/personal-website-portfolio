@@ -40,11 +40,10 @@
   let isRecording = false;
   let isSpeaking = false;
   let recognition = null;
-  let speechQueue = [];
-  let currentUtterance = null;
+  let currentAudio = null;
   let tooltipTimeout = null;
   let tooltipHideTimeout = null;
-  let voicesLoaded = false;
+  let conversationHistory = [];
 
   // Three.js / VRM state
   let vrmScene = null;
@@ -113,7 +112,6 @@
     initTooltip();
     initChatPanel();
     initSpeechRecognition();
-    preloadVoices();
   }
 
   // ─── 3D VRM Avatar (Three.js + @pixiv/three-vrm) ─────────────
@@ -629,6 +627,9 @@
     // Add user message
     appendMessage('user', text);
 
+    // Track in conversation history
+    conversationHistory.push({ role: 'user', content: text });
+
     // Show typing indicator
     isLoading = true;
     updateSendButton();
@@ -638,7 +639,10 @@
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: text }),
+        body: JSON.stringify({
+          query: text,
+          history: conversationHistory.slice(-6),
+        }),
       });
 
       if (!response.ok) {
@@ -653,9 +657,16 @@
       // Add bot message
       appendMessage('bot', data.answer, data.sources);
 
-      // Auto-speak the response
+      // Track assistant response in history
       if (data.answer) {
-        speakResponse(data.answer, data.detectedLang || 'en-US');
+        conversationHistory.push({ role: 'assistant', content: data.answer });
+      }
+
+      // Play synthesized audio if available, else fall back to browser TTS
+      if (data.audioBase64) {
+        playBase64Audio(data.audioBase64);
+      } else if (data.answer && window.speechSynthesis) {
+        speakResponseFallback(data.answer, data.detectedLang || 'en-US');
       }
     } catch (error) {
       console.error('Annai chat error:', error);
@@ -834,175 +845,68 @@
     }
   }
 
-  // ─── Text-to-Speech (TTS) — Human Pacing Engine ──────────────
+  // ─── Audio Playback (HTML5 Audio from Base64) ─────────────────
 
   /**
-   * Preload browser voices (they load asynchronously in many browsers).
+   * Play Base64-encoded MP3 audio from the backend TTS pipeline.
+   * Syncs the 3D avatar speaking state with playback events.
    */
-  function preloadVoices() {
-    if (!window.speechSynthesis) return;
-
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) voicesLoaded = true;
-    };
-
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-  }
-
-  /**
-   * Select the best female voice for the given language code.
-   * Priority: exact lang + female → lang family + female → any female → default
-   */
-  function selectFemaleVoice(langCode) {
-    if (!window.speechSynthesis) return null;
-
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length === 0) return null;
-
-    const langPrefix = langCode.split('-')[0].toLowerCase(); // e.g., "en" from "en-US"
-
-    // Known female voice name patterns (case-insensitive)
-    const femalePatterns = [
-      'female', 'woman', 'girl',
-      // Common specific female voice names
-      'samantha', 'victoria', 'karen', 'moira', 'tessa', 'fiona', 'veena',
-      'kyoko', 'o-ren', 'mei-jia', 'sin-ji',
-      'lekha', 'rishi', // some Hindi voices
-      'google.*female',
-      'zira', 'hazel', 'susan', 'linda',
-      // Google TTS female voices
-      'google uk english female', 'google us english',
-    ];
-
-    function isFemaleVoice(voice) {
-      const name = voice.name.toLowerCase();
-      return femalePatterns.some((pattern) => {
-        if (pattern.includes('*')) {
-          return new RegExp(pattern).test(name);
-        }
-        return name.includes(pattern);
-      });
-    }
-
-    function matchesLang(voice, exactCode, prefix) {
-      const voiceLang = voice.lang.toLowerCase();
-      if (voiceLang === exactCode.toLowerCase()) return 'exact';
-      if (voiceLang.startsWith(prefix)) return 'prefix';
-      return null;
-    }
-
-    // Tier 1: Exact language + female
-    let match = voices.find(
-      (v) => matchesLang(v, langCode, langPrefix) === 'exact' && isFemaleVoice(v)
-    );
-    if (match) return match;
-
-    // Tier 2: Language prefix + female
-    match = voices.find(
-      (v) => matchesLang(v, langCode, langPrefix) === 'prefix' && isFemaleVoice(v)
-    );
-    if (match) return match;
-
-    // Tier 3: Exact language, any gender
-    match = voices.find(
-      (v) => matchesLang(v, langCode, langPrefix) === 'exact'
-    );
-    if (match) return match;
-
-    // Tier 4: Language prefix, any gender
-    match = voices.find(
-      (v) => matchesLang(v, langCode, langPrefix) === 'prefix'
-    );
-    if (match) return match;
-
-    // Tier 5: Any female voice (English fallback)
-    match = voices.find((v) => isFemaleVoice(v));
-    if (match) return match;
-
-    // Tier 6: Default
-    return voices[0] || null;
-  }
-
-  /**
-   * Split text into sentences for natural pacing.
-   * Splits on sentence-ending punctuation across multiple languages:
-   *   English: . ? !
-   *   Hindi: । (purna viram)
-   *   Japanese: 。？！
-   *   Chinese: 。？！
-   */
-  function splitIntoSentences(text) {
-    // Split on sentence-ending punctuation, keeping the delimiter
-    const parts = text.split(/(?<=[.?!।。？！])\s*/);
-    return parts
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-  }
-
-  /**
-   * Speak the response using sentence-by-sentence queuing with
-   * 300ms breathing pauses between sentences.
-   */
-  function speakResponse(text, langCode) {
-    if (!window.speechSynthesis) return;
-
-    // Cancel any ongoing speech
+  function playBase64Audio(base64Data) {
     stopSpeaking();
 
-    const sentences = splitIntoSentences(text);
-    if (sentences.length === 0) return;
+    const audio = new Audio('data:audio/mp3;base64,' + base64Data);
+    currentAudio = audio;
 
-    isSpeaking = true;
-    updateSpeakerButton();
-    speechQueue = [...sentences];
+    audio.addEventListener('play', () => {
+      isSpeaking = true;
+      updateSpeakerButton();
+    });
 
-    speakNextSentence(langCode);
+    audio.addEventListener('ended', () => {
+      isSpeaking = false;
+      currentAudio = null;
+      updateSpeakerButton();
+    });
+
+    audio.addEventListener('error', (e) => {
+      console.warn('Audio playback error:', e);
+      isSpeaking = false;
+      currentAudio = null;
+      updateSpeakerButton();
+    });
+
+    audio.play().catch((err) => {
+      console.warn('Audio autoplay blocked:', err.message);
+      isSpeaking = false;
+      currentAudio = null;
+      updateSpeakerButton();
+    });
   }
 
-  function speakNextSentence(langCode) {
-    if (speechQueue.length === 0 || !isSpeaking) {
+  /**
+   * Lightweight browser TTS fallback — used only when backend
+   * returns no audioBase64 (e.g., both ElevenLabs and Google fail).
+   */
+  function speakResponseFallback(text, langCode) {
+    if (!window.speechSynthesis) return;
+    stopSpeaking();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = langCode;
+    utterance.rate = 0.95;
+    utterance.pitch = 1.05;
+
+    utterance.onstart = () => {
+      isSpeaking = true;
+      updateSpeakerButton();
+    };
+    utterance.onend = () => {
       isSpeaking = false;
       updateSpeakerButton();
-      return;
-    }
-
-    const sentence = speechQueue.shift();
-    const utterance = new SpeechSynthesisUtterance(sentence);
-    currentUtterance = utterance;
-
-    // Set voice
-    const voice = selectFemaleVoice(langCode);
-    if (voice) {
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
-    } else {
-      utterance.lang = langCode;
-    }
-
-    utterance.rate = TTS_RATE;
-    utterance.pitch = TTS_PITCH;
-
-    utterance.onend = () => {
-      if (speechQueue.length > 0 && isSpeaking) {
-        // Human breathing pause before next sentence
-        setTimeout(() => speakNextSentence(langCode), TTS_SENTENCE_PAUSE_MS);
-      } else {
-        isSpeaking = false;
-        updateSpeakerButton();
-      }
     };
-
-    utterance.onerror = (e) => {
-      console.warn('TTS error:', e.error);
-      // Try next sentence anyway
-      if (speechQueue.length > 0 && isSpeaking) {
-        setTimeout(() => speakNextSentence(langCode), TTS_SENTENCE_PAUSE_MS);
-      } else {
-        isSpeaking = false;
-        updateSpeakerButton();
-      }
+    utterance.onerror = () => {
+      isSpeaking = false;
+      updateSpeakerButton();
     };
 
     window.speechSynthesis.speak(utterance);
@@ -1010,11 +914,19 @@
 
   function stopSpeaking() {
     isSpeaking = false;
-    speechQueue = [];
-    currentUtterance = null;
+
+    // Stop HTML5 Audio if playing
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
+    }
+
+    // Stop browser TTS if active
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
+
     updateSpeakerButton();
   }
 
@@ -1022,7 +934,6 @@
     if (isSpeaking) {
       stopSpeaking();
     }
-    // If not speaking, there's nothing to toggle — the next response will auto-speak
   }
 
   function updateSpeakerButton() {

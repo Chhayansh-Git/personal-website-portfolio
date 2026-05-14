@@ -25,3 +25,4 @@ package-lock.json
 # Annai ETL pipeline (secrets and dependencies)
 _scripts/voice-rag-etl/node_modules/
 _scripts/voice-rag-etl/.env
+client_secret_*.json
