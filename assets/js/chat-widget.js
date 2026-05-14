@@ -144,6 +144,13 @@
     const maxAttempts = 50; // 50 × 100ms = 5 seconds
 
     function tryInit3D() {
+      // Optimiziation: Drop 3D model on mobile/tablet screens for performance
+      if (window.innerWidth <= 768) {
+        console.log('Annai: Mobile screen detected. Skipping 3D VRM for optimization.');
+        renderFallbackAvatar(container);
+        return;
+      }
+
       if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined') {
         try {
           initThreeScene(container);
@@ -463,7 +470,7 @@
     disposeVRM();
     container.innerHTML = `
       <div class="annai-avatar-fallback">
-        ${ICONS.annai}
+        <img src="/images/favicon-192x192.png" alt="Annai Favicon" style="width: 50px; height: 50px; z-index: 1;" />
       </div>
     `;
   }

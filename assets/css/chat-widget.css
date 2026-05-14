@@ -635,6 +635,21 @@
     max-width: 200px;
     font-size: 0.78rem;
   }
+
+  /* Optimized Fallback for Mobile */
+  .annai-avatar-fallback {
+    width: 60px;
+    height: 60px;
+    animation: none;
+    background: transparent;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    margin: 80px auto 0;
+  }
+  
+  .annai-avatar-fallback::before, 
+  .annai-avatar-fallback::after {
+    display: none;
+  }
 }
 
 /* Phones */
