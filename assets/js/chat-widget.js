@@ -654,7 +654,12 @@
       });
 
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        let errMsg = `Server error: ${response.status}`;
+        try {
+          const errData = await response.json();
+          if (errData && errData.error) errMsg = errData.error;
+        } catch(e) {}
+        throw new Error(errMsg);
       }
 
       const data = await response.json();
@@ -680,7 +685,7 @@
     } catch (error) {
       console.error('Annai chat error:', error);
       if (typingEl) typingEl.remove();
-      appendError('Sorry, I couldn\'t connect. Please check your network and try again.');
+      appendError(error.message && !error.message.includes('Failed to fetch') ? error.message : "Sorry, I couldn't connect. Please check your network and try again.");
     } finally {
       isLoading = false;
       updateSendButton();
