@@ -13,7 +13,7 @@ title                    : "Chhayansh Porwal | AI Enthusiast & Software Develope
 title_separator          : "-"
 name                     : &name "Chhayansh Porwal"
 description              : &description "Software Developer bridging native Android architecture, computer vision pipelines, and full-stack AI architectures."
-url                      : "https://chhayanshporwal.github.io" # Update with your actual domain if you buy one
+url                      : "https://chhayanshporwal.github.io" 
 baseurl                  : ""
 repository               : "chhayanshporwal/chhayanshporwal.github.io"
 
