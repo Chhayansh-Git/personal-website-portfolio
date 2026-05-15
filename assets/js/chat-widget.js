@@ -539,8 +539,15 @@
     if (speaker) speaker.addEventListener('click', toggleSpeaker);
   }
 
-  function toggleChat() {
-    isOpen = !isOpen;
+  function toggleChat(forceOpen) {
+    if (typeof forceOpen === 'boolean') {
+      isOpen = forceOpen;
+    } else {
+      isOpen = !isOpen;
+    }
+    
+    sessionStorage.setItem('annai_chat_open', isOpen);
+    
     const panel = chatPanel();
     const container = avatarContainer();
     const tip = tooltip();
@@ -601,11 +608,8 @@
     if (container) container.classList.remove('annai-sleeping');
     if (wakeArrow()) wakeArrow().classList.remove('annai-visible');
     
-    // Step 2: Change state to awake so she smoothly stands up
+    // Switch to awake state
     annaiState = 'awake';
-    
-    // Step 3: Trigger wave *after* she stands up (increased delay for smoother cinematic feel)
-    setTimeout(() => { 
       isVrmHovered = true; 
     }, 1200); 
     
@@ -666,7 +670,8 @@
 
       // Track assistant response in history
       if (data.answer) {
-        conversationHistory.push({ role: 'assistant', content: data.answer });
+        conversationHistory.push({ role: 'assistant', content: data.answer, sources: data.sources });
+        sessionStorage.setItem('annai_chat_history', JSON.stringify(conversationHistory));
       }
 
       // Play synthesized audio if available, else fall back to browser TTS
