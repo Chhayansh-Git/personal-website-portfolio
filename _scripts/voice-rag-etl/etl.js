@@ -60,6 +60,7 @@ async function embedText(text) {
     body: JSON.stringify({
       model: `models/${EMBEDDING_MODEL}`,
       content: { parts: [{ text }] },
+      outputDimensionality: 768,
     }),
   });
   if (!res.ok) {
@@ -92,6 +93,21 @@ async function pineconeUpsert(host, vectors) {
   });
   if (!res.ok) {
     throw new Error(`Pinecone upsert failed ${res.status}: ${await res.text()}`);
+  }
+  return res.json();
+}
+
+async function pineconeDeleteAll(host) {
+  const res = await fetch(`https://${host}/vectors/delete`, {
+    method: 'POST',
+    headers: {
+      'Api-Key': PINECONE_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ deleteAll: true }),
+  });
+  if (!res.ok) {
+    throw new Error(`Pinecone delete failed ${res.status}: ${await res.text()}`);
   }
   return res.json();
 }
@@ -195,7 +211,11 @@ async function main() {
   });
 
   // 7. Upsert
-  console.log(`\n⬆️   Upserting ${vectors.length} vectors...`);
+  console.log(`\n🧹  Wiping all previous vectors from Pinecone...`);
+  await pineconeDeleteAll(host);
+  console.log(`     ✓ Index cleared.`);
+
+  console.log(`\n⬆️   Upserting ${vectors.length} new vectors...`);
   const t0 = Date.now();
   for (let i = 0; i < vectors.length; i += UPSERT_BATCH) {
     const batch = vectors.slice(i, i + UPSERT_BATCH);
