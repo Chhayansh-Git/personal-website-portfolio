@@ -771,18 +771,25 @@
     }
 
     recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
+    let sessionFinalTranscript = '';
+
+    recognition.onstart = () => {
+      sessionFinalTranscript = '';
+      const input = inputField();
+      if (input) input.value = '';
+    };
+
     recognition.onresult = (event) => {
-      let finalTranscript = '';
       let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += transcript;
+          sessionFinalTranscript += transcript + ' ';
         } else {
           interimTranscript += transcript;
         }
@@ -790,13 +797,7 @@
 
       const input = inputField();
       if (input) {
-        input.value = finalTranscript || interimTranscript;
-      }
-
-      // Auto-send on final result
-      if (finalTranscript) {
-        stopRecording();
-        setTimeout(() => sendMessage(finalTranscript.trim()), 200);
+        input.value = (sessionFinalTranscript + interimTranscript).trim();
       }
     };
 
