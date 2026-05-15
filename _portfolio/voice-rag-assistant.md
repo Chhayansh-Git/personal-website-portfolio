@@ -1,20 +1,25 @@
 ---
 title: "Annai: Voice-Enabled RAG Architecture"
-excerpt: "A scalable, multi-lingual AI assistant utilizing a Pinecone Vector Database, LangChain, and Vercel Serverless with intelligent TTS fallback routing."
+excerpt: "A scalable, self-aware AI assistant utilizing a Pinecone Vector Database and Vercel Serverless with a highly optimized Zero-LangChain architecture."
 collection: portfolio
 ---
 
 ## Overview
-To demonstrate production-grade LLM engineering, I built "Annai"—a custom Retrieval-Augmented Generation (RAG) assistant integrated directly into this portfolio. Instead of utilizing basic API wrappers, this system relies on a standalone serverless backend and a dedicated vector database to answer complex technical queries about my work with zero hallucinations.
+To demonstrate production-grade LLM engineering, I built "Annai"—a custom Retrieval-Augmented Generation (RAG) assistant integrated directly into this portfolio. Instead of utilizing basic API wrappers or heavy abstraction frameworks, this system relies on a lightweight, standalone serverless backend and a dedicated vector database to answer complex technical queries about my work with zero hallucinations. 
+
+Annai is entirely self-aware and capable of intelligently describing her own architecture and creation process to users.
 
 ## The ETL Data Pipeline
-The system's knowledge base is generated via a custom Node.js ETL (Extract, Transform, Load) script. It chunks my raw markdown project files, embeds the text using Google's `text-embedding-004` model, and indexes the vectors into a **Pinecone Serverless Database** alongside relational metadata (such as GitHub URLs).
+The system's knowledge base is generated via a custom Node.js ETL (Extract, Transform, Load) script. This script automatically wipes stale ghost vectors from the database to ensure pristine data hygiene, chunks my raw project files, embeds the text using Google's `gemini-embedding-001` model, and indexes the vectors into a **Pinecone Serverless Database** alongside relational metadata (such as GitHub URLs and detailed portfolio deep links).
 
-## Serverless Orchestration & Memory
+## Zero-LangChain Serverless Orchestration
 When a user speaks into the microphone on the frontend, the browser's native Web Speech API transcribes the audio and POSTs it to a **Vercel Serverless Function**. 
-* **LangChain.js** manages the orchestration, maintaining conversational memory.
-* If a user asks a follow-up question using pronouns, the LLM executes a *Contextualize Question* step to rewrite the query before executing the cosine similarity search against Pinecone.
-* The system utilizes **Gemini 1.5 Flash** for high-speed generation, strictly constrained to outputting contextually accurate answers in either English or Hindi depending on the user's input.
 
-## Highly Available Audio Synthesis
-To ensure the 3D avatar maintains a premium voice without incurring massive API costs, the backend implements an automated fallback routing strategy. It attempts to synthesize speech via **ElevenLabs**, but if quotas are exhausted, it catches the 401 error and dynamically reroutes the payload to **Google Cloud Neural TTS**, guaranteeing 100% uptime for the user interface.
+I intentionally engineered a **Zero-LangChain** architecture, utilizing raw `fetch` for all API calls to minimize cold-start latency and reduce bundle size. The backend manages conversational memory automatically. If a user asks a follow-up question using pronouns, the LLM executes a *Contextualize Question* step to rewrite the query before executing the cosine similarity search against Pinecone.
+
+The system utilizes **Gemini 1.5 Flash** for high-speed generation. Annai is locked behind a strict grounding prompt that completely forbids hallucinations—if a question falls outside the scope of my top 5 core projects, she politely declines.
+
+## Low-Latency Audio Synthesis & State Persistence
+To ensure the 3D avatar maintains a premium, fast-responding voice, the backend relies exclusively on **Google Cloud Neural2 TTS**. By stripping away third-party fallback dependencies, the system achieves incredibly low latency for voice generation. 
+
+On the frontend side, the chat widget implements `sessionStorage` persistence, guaranteeing that a user's conversation history and chat window state remain fully intact even as they navigate across different pages of the portfolio.
