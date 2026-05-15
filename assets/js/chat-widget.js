@@ -610,9 +610,6 @@
     
     // Switch to awake state
     annaiState = 'awake';
-      isVrmHovered = true; 
-    }, 1200); 
-    
     resetSleepTimer();
   }
 
