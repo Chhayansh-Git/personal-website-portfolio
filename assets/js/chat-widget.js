@@ -703,13 +703,23 @@
       sourcesEl.className = 'annai-sources';
 
       for (const source of sources) {
-        const chip = document.createElement('a');
-        chip.className = 'annai-source-chip';
-        chip.href = source.url;
-        chip.target = '_blank';
-        chip.rel = 'noopener noreferrer';
-        chip.innerHTML = `${ICONS.github} ${escapeHtml(source.name)}`;
-        sourcesEl.appendChild(chip);
+        if (source.url) {
+          const chip = document.createElement('a');
+          chip.className = 'annai-source-chip';
+          chip.href = source.url;
+          chip.target = '_blank';
+          chip.rel = 'noopener noreferrer';
+          chip.innerHTML = `${ICONS.github} ${escapeHtml(source.name)}`;
+          sourcesEl.appendChild(chip);
+        }
+        
+        if (source.detailedUrl) {
+          const detailChip = document.createElement('a');
+          detailChip.className = 'annai-source-chip';
+          detailChip.href = source.detailedUrl;
+          detailChip.innerHTML = `📄 Details: ${escapeHtml(source.name)}`;
+          sourcesEl.appendChild(detailChip);
+        }
       }
       msg.appendChild(sourcesEl);
     }
