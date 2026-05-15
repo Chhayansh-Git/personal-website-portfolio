@@ -6,6 +6,8 @@ excerpt: "An AI-powered image processing backend to rapidly evaluate and filter 
 collection: portfolio
 ---
 
+[<i class="fab fa-fw fa-github"></i> View Source Code](https://github.com/chhayanshporwal/AI-Wedding-Culling-Suite)
+
 **Summary:** An automated REST pipeline that evaluates massive bursts of wedding photos to filter out bad shots and group duplicates.
 
 *   **Problem:** Wedding photographers spend countless hours manually culling thousands of burst shots, wasting time identifying blurry images, closed eyes, and redundant frames.

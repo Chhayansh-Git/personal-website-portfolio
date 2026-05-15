@@ -6,6 +6,8 @@ excerpt: "A native Android security application engineered for proactive privacy
 collection: portfolio
 ---
 
+[<i class="fab fa-fw fa-github"></i> View Source Code](https://github.com/chhayanshporwal/CallSentry) | [<i class="fas fa-fw fa-download"></i> Download APK (Beta)](https://github.com/chhayanshporwal/CallSentry/releases/tag/v1.0.0-beta)
+
 **Summary:** A system-level Android application that balances strict communication privacy with reliable emergency contact routing.
 
 *   **Problem:** Existing call blockers either let spam through or rigidly block everything, lacking fine-grained control to ensure critical emergency calls can bypass filters safely.

@@ -6,6 +6,8 @@ excerpt: "A scalable, self-aware AI assistant utilizing a Pinecone Vector Databa
 collection: portfolio
 ---
 
+[<i class="fab fa-fw fa-github"></i> View Source Code](https://github.com/chhayanshporwal/voice-rag-backend)
+
 ## Overview
 To demonstrate production-grade LLM engineering, I built "Annai"—a custom Retrieval-Augmented Generation (RAG) assistant integrated directly into this portfolio. Instead of utilizing basic API wrappers or heavy abstraction frameworks, this system relies on a lightweight, standalone serverless backend and a dedicated vector database to answer complex technical queries about my work with zero hallucinations. 
 

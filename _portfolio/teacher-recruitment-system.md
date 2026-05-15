@@ -6,6 +6,8 @@ excerpt: "A full-stack ML-powered recruitment marketplace connecting candidates,
 collection: portfolio
 ---
 
+[<i class="fab fa-fw fa-github"></i> View Source Code](https://github.com/chhayanshporwal/teacher-recruitment-system)
+
 **Summary:** A full-stack web platform with an integrated ML matching engine designed to centralize and intelligently streamline the hiring process for educational institutions.
 
 *   **Problem:** The hiring process for schools is highly fragmented, lacking a unified platform that can simultaneously handle candidate applications, school job postings, and overarching system administration — let alone intelligently match candidates to opportunities.

@@ -10,6 +10,8 @@ date: 2026-05-09
 venue: 'AI4Life International Grand Challenge'
 ---
 
+[<i class="fab fa-fw fa-github"></i> View Source Code](https://github.com/chhayanshporwal/3d-n2v-calcium-denoising)
+
 **Summary:** A competitive research project focused on developing self-supervised machine learning models to denoise high-resolution biological calcium imaging — achieving **Global Rank 2**.
 
 *   **Problem:** High-resolution biological calcium imaging suffers from severe noise, and acquiring clean "ground truth" data for supervised machine learning is practically impossible in this domain.
